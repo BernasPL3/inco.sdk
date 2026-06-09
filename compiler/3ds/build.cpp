@@ -5,47 +5,56 @@
 
 void build3DS() {
 
-    std::cout << "[INCO.SDK] Build Nintendo 3DS\n";
+    std::cout << "[INCO.SDK] Nintendo 3DS Build\n";
 
-    // Criar pasta build
     system("mkdir -p build");
 
-    // Compilar .cpp -> .elf
+    // Compilar ELF
     int compile = system(
-        "arm-none-eabi-g++ "
+        "./toolchains/3ds/arm-none-eabi-g++ "
         "source/main.cpp "
-        "-o build/game.elf "
-        "-march=armv6k "
-        "-mtune=mpcore "
-        "-mfloat-abi=hard "
-        "-mtp=soft "
-        "-D__3DS__ "
-        "-I/opt/devkitpro/libctru/include "
-        "-L/opt/devkitpro/libctru/lib "
-        "-lctru"
+        "-o build/game.elf"
     );
 
     if(compile != 0) {
-        std::cout << "Erro ao compilar ELF!\n";
+        std::cout << "Erro ao compilar ELF\n";
         return;
     }
 
     std::cout << "ELF gerado!\n";
 
-    // Gerar .3dsx
+    // Gerar 3DSX
     int build3dsx = system(
-        "3dsxtool "
+        "./toolchains/3ds/3dsxtool "
         "build/game.elf "
         "build/game.3dsx"
     );
 
     if(build3dsx != 0) {
-        std::cout << "Erro ao gerar 3DSX!\n";
+        std::cout << "Erro ao gerar 3DSX\n";
         return;
     }
 
     std::cout << "3DSX gerado!\n";
 
-    // Gerar ícone SMDH
+    // Criar SMDH
     system(
-        "bannertool makes
+        "./toolchains/3ds/bannertool makesmdh "
+        "-s \"MarioClone3DS\" "
+        "-l \"INCO.SDK\" "
+        "-p \"Bernardo\" "
+        "-i icon.png "
+        "-o build/icon.icn"
+    );
+
+    // Gerar CIA
+    system(
+        "./toolchains/3ds/makerom "
+        "-f cia "
+        "-o build/game.cia "
+        "-elf build/game.elf "
+        "-icon build/icon.icn"
+    );
+
+    std::cout << "CIA gerado!\n";
+}
